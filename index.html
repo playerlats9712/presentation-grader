@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktiver Bewertungsbogen für Präsentationen (Dark Mode)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .rating-radio:checked + label {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        @media print {
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            .bg-slate-800, .bg-slate-900, .bg-slate-950 { background: white !important; color: black !important; border: 1px solid #ddd !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 font-sans antialiased">
+
+<!-- Chosen Palette: Deep Ocean Dark -->
+<!-- Application Structure Plan: Reduzierte SPA mit Fokus auf 4 Kernkriterien. Die Gewichtung ist gleichmäßig auf 25% pro Punkt verteilt. Das Dashboard rechts zeigt weiterhin den Live-Score und ein angepasstes Radar-Chart für diese 4 Dimensionen. -->
+<!-- Visualization & Content Choices: Radar Chart mit 4 Achsen. Einfache 1-5 Skala für schnelle Evaluierung. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <header class="mb-8 border-b border-slate-800 pb-6">
+        <h1 class="text-3xl font-bold text-white">Präsentations-Feedback</h1>
+        <p class="text-slate-400 mt-2 text-lg">Individueller Bewertungsbogen für die wesentlichen Kernkompetenzen.</p>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <div class="lg:col-span-8 space-y-8">
+            
+            <section class="bg-slate-900 p-6 rounded-xl shadow-xl border border-slate-800">
+                <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-800 pb-2">Allgemeine Informationen</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">Referent/in</label>
+                        <input type="text" class="w-full bg-slate-800 border border-slate-700 text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Name eingeben">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">Thema</label>
+                        <input type="text" class="w-full bg-slate-800 border border-slate-700 text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Titel der Präsentation">
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-slate-900 p-6 rounded-xl shadow-xl border border-slate-800">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-6">
+                    <h2 class="text-xl font-semibold text-white">Bewertungskriterien</h2>
+                    <span class="text-slate-500 text-sm">Skala: 1 (schwach) bis 5 (stark)</span>
+                </div>
+                
+                <div class="space-y-6" id="criteria-container">
+                    <!-- Wird per JS befüllt -->
+                </div>
+            </section>
+
+            <section class="bg-slate-900 p-6 rounded-xl shadow-xl border border-slate-800">
+                <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-800 pb-2">Zusätzliche Anmerkungen</h2>
+                <textarea class="w-full bg-slate-800 border border-slate-700 text-white rounded-md p-3 focus:ring-2 focus:ring-blue-500 outline-none h-32 transition-all" placeholder="Hier ist Platz für individuelles Feedback..."></textarea>
+            </section>
+
+        </div>
+
+        <div class="lg:col-span-4">
+            <div class="bg-slate-900 rounded-xl shadow-2xl border border-slate-800 sticky top-6 overflow-hidden">
+                
+                <div class="p-8 border-b border-slate-800 bg-slate-900/50 text-center">
+                    <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Durchschnitts-Score</h2>
+                    <div class="text-6xl font-black text-blue-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]" id="total-score">0.0</div>
+                    <div class="text-slate-500 mt-2 text-sm font-medium">Skala 1.0 - 5.0</div>
+                </div>
+
+                <div class="p-6 space-y-8">
+                    <div>
+                        <h3 class="font-semibold text-white mb-6 text-center">Visualisierung</h3>
+                        <div class="chart-container">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <button onclick="window.print()" class="no-print w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg shadow-blue-900/20 transition-all active:scale-95">
+                        Bericht drucken
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const config = [
+        { id: 'ausdruck', title: 'Ausdrucksweise', desc: 'Rhetorik, Wortwahl & Verständlichkeit' },
+        { id: 'qualitaet', title: 'Qualität der Präsentation', desc: 'Design, Struktur & Medieneinsatz' },
+        { id: 'korrektheit', title: 'Korrektheit der Infos', desc: 'Fachliche Richtigkeit & Tiefe' },
+        { id: 'nutzen', title: 'Persönlicher Nutzen/Wirkung', desc: 'Mehrwert & Gesamteindruck' }
+    ];
+
+    const scores = {};
+    let radarChartInstance = null;
+
+    function renderCriteria() {
+        const container = document.getElementById('criteria-container');
+        let html = '';
+        
+        config.forEach(item => {
+            scores[item.id] = 0;
+            html += `
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-800/30 rounded-lg border border-slate-800/50 hover:border-slate-700 transition-all">
+                    <div>
+                        <h4 class="font-bold text-slate-200 text-lg">${item.title}</h4>
+                        <p class="text-sm text-slate-500">${item.desc}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        ${[1,2,3,4,5].map(val => `
+                            <div class="relative">
+                                <input type="radio" name="${item.id}" id="${item.id}_${val}" value="${val}" 
+                                       class="rating-radio sr-only" 
+                                       onchange="updateScore('${item.id}', ${val})">
+                                <label for="${item.id}_${val}" class="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-700 cursor-pointer hover:bg-slate-700 text-slate-400 font-bold transition-all">
+                                    ${val}
+                                </label>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    function updateScore(id, value) {
+        scores[id] = value;
+        calculateTotal();
+    }
+
+    function calculateTotal() {
+        const values = Object.values(scores).filter(v => v > 0);
+        const avg = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+        
+        const scoreEl = document.getElementById('total-score');
+        scoreEl.textContent = avg.toFixed(1);
+        
+        // Farbe anpassen
+        if(avg >= 4.0) scoreEl.className = "text-6xl font-black text-emerald-400 drop-shadow-[0_0_10px_#10b98155]";
+        else if(avg >= 2.5) scoreEl.className = "text-6xl font-black text-blue-500 drop-shadow-[0_0_10px_#3b82f655]";
+        else if(avg > 0) scoreEl.className = "text-6xl font-black text-amber-500 drop-shadow-[0_0_10px_#f59e0b55]";
+        
+        updateChart();
+    }
+
+    function initChart() {
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        radarChartInstance = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: config.map(c => c.title),
+                datasets: [{
+                    data: [0, 0, 0, 0],
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: '#3b82f6',
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#0f172a',
+                    borderWidth: 3,
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: '#334155' },
+                        grid: { color: '#334155' },
+                        pointLabels: { color: '#94a3b8', font: { weight: 'bold', size: 10 } },
+                        ticks: { display: false, stepSize: 1 },
+                        suggestedMin: 0, suggestedMax: 5
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    function updateChart() {
+        if(radarChartInstance) {
+            radarChartInstance.data.datasets[0].data = config.map(c => scores[c.id]);
+            radarChartInstance.update();
+        }
+    }
+
+    window.onload = () => {
+        renderCriteria();
+        initChart();
+    };
+</script>
+
+</body>
+</html>
