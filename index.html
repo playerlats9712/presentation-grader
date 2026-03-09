@@ -20,98 +20,81 @@
             border-color: #3b82f6;
         }
 
-        /* PRINT STYLES */
+        /* PRINT STYLES - Radikaler Fix */
         @media print {
-            @page { size: A4; margin: 15mm; }
+            @page { size: A4; margin: 20mm; }
             
-            /* Reset für den Hintergrund und Textfarben */
+            /* Alles auf Standard zurücksetzen */
+            * { 
+                background: transparent !important; 
+                color: black !important; 
+                text-shadow: none !important; 
+                box-shadow: none !important;
+                visibility: visible !important;
+            }
+
             html, body { 
                 background: white !important; 
-                color: black !important; 
-                width: 100% !important; 
-                height: auto !important;
-                margin: 0 !important;
+                margin: 0 !important; 
                 padding: 0 !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
+                width: 100% !important;
             }
 
             .no-print { display: none !important; }
             
-            /* Layout Anpassungen */
-            .max-w-7xl { max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            /* Layout für Druck linearisieren */
+            .max-w-7xl { max-width: 100% !important; width: 100% !important; }
             .grid { display: block !important; }
-            
-            /* Boxen für Print neutralisieren */
             section, .bg-slate-900, .bg-slate-950 { 
-                background: white !important; 
-                color: black !important;
-                border: none !important; 
-                box-shadow: none !important; 
-                padding: 0 !important;
-                margin-bottom: 30px !important;
-                display: block !important;
-                visibility: visible !important;
-            }
-            
-            h1, h2, h3 { color: black !important; border-bottom: 2px solid #000 !important; padding-bottom: 5px !important; margin-top: 10px !important; }
-            input, textarea { 
-                border: 1px solid #ddd !important; 
-                background: white !important; 
-                color: black !important; 
-                width: 100% !important;
-                padding: 8px !important;
-            }
-            
-            /* Die interaktive Liste im Print komplett ausblenden */
-            #criteria-container { display: none !important; }
-            
-            /* Die Druck-Tabelle einblenden */
-            #print-table-container { 
                 display: block !important; 
-                visibility: visible !important;
-                margin-top: 20px !important;
-                width: 100% !important;
+                width: 100% !important; 
+                border: none !important; 
+                margin-bottom: 20px !important; 
+                padding: 0 !important;
             }
 
-            table { width: 100% !important; border-collapse: collapse !important; }
-            th, td { border-bottom: 1px solid #eee !important; padding: 10px !important; color: black !important; }
-            th { background-color: #f8f9fa !important; }
+            h1 { font-size: 24pt !important; margin-bottom: 10px !important; border-bottom: 2px solid black !important; }
+            h2 { font-size: 18pt !important; margin-top: 20px !important; border-bottom: 1px solid black !important; }
             
-            /* Sidebar Diagramm Positionierung im Print */
-            .lg\:col-span-4 { 
+            /* Interaktive Kriterienliste verstecken */
+            #criteria-container { display: none !important; }
+            
+            /* Druck-Tabelle erzwingen */
+            #print-table-container { 
                 display: block !important; 
-                margin-top: 40px !important; 
-                page-break-before: auto;
-            }
-            
-            .chart-container { 
                 width: 100% !important; 
-                max-width: 450px !important; 
-                height: 350px !important; 
-                margin: 20px auto !important; 
+                margin-top: 20px !important;
             }
+            table { width: 100% !important; border-collapse: collapse !important; margin-bottom: 30px !important; }
+            th, td { border: 1px solid #ccc !important; padding: 8px !important; text-align: left !important; }
+            th { background: #f0f0f0 !important; }
+
+            /* Diagramm fixieren */
+            .lg\:col-span-4 { display: block !important; margin-top: 30px !important; }
+            .chart-container { width: 100% !important; max-width: 400px !important; height: 300px !important; margin: 0 auto !important; }
             
-            #total-score { 
-                color: #2563eb !important; 
-                font-size: 48pt !important; 
-                text-align: center !important;
-                margin: 10px 0 !important;
+            /* Score fixieren */
+            #total-score { font-size: 36pt !important; color: black !important; text-align: center !important; margin: 20px 0 !important; }
+            
+            textarea, input { 
+                border: 1px solid #999 !important; 
+                padding: 10px !important; 
+                width: 100% !important;
+                min-height: 50px !important;
             }
         }
 
-        /* Standardmäßig versteckt im Browser */
         #print-table-container { display: none; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200 font-sans antialiased">
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="main-content">
     
     <header class="mb-8 border-b border-slate-800 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
             <h1 class="text-3xl font-bold text-white">Präsentations-Feedback</h1>
-            <p class="text-slate-400 mt-2 text-lg">Ergebnisbericht der Bewertung</p>
+            <p class="text-slate-400 mt-2 text-lg">Individueller Ergebnisbericht</p>
         </div>
         <div class="no-print">
             <button onclick="prepareAndPrint()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg shadow-lg font-bold transition-all active:scale-95">
@@ -122,11 +105,9 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        <!-- Hauptinhalt -->
         <div class="lg:col-span-8 space-y-8">
-            
             <section class="bg-slate-900 p-6 rounded-xl shadow-xl border border-slate-800">
-                <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-800 pb-2">Allgemeine Informationen</h2>
+                <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-800 pb-2">Informationen</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-400 mb-1">Referent/in</label>
@@ -140,57 +121,43 @@
             </section>
 
             <section class="bg-slate-900 p-6 rounded-xl shadow-xl border border-slate-800">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-2 mb-6 gap-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-6">
                     <h2 class="text-xl font-semibold text-white">Bewertungskriterien</h2>
-                    
-                    <div class="no-print flex w-full sm:w-auto gap-2">
-                        <input type="text" id="new-criterion-input" class="bg-slate-800 border border-slate-700 text-sm rounded-md px-3 py-2 outline-none flex-grow" placeholder="Neu hinzufügen...">
-                        <button onclick="addCriterion()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-md text-sm font-bold transition-all">
-                            +
-                        </button>
+                    <div class="no-print flex gap-2">
+                        <input type="text" id="new-criterion-input" class="bg-slate-800 border border-slate-700 text-sm rounded-md px-3 py-1 outline-none" placeholder="Neu...">
+                        <button onclick="addCriterion()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded-md text-sm font-bold">+</button>
                     </div>
                 </div>
                 
-                <!-- Browser Ansicht: Interaktive Liste -->
                 <div class="space-y-4" id="criteria-container"></div>
 
-                <!-- Print Ansicht: Formatierte Tabelle -->
+                <!-- Print Ansicht: Tabelle -->
                 <div id="print-table-container">
-                    <table class="w-full text-left">
+                    <table>
                         <thead>
                             <tr>
-                                <th>Bewertungskriterium</th>
-                                <th class="text-right">Punkte (1-5)</th>
+                                <th>Kriterium</th>
+                                <th style="text-align: right;">Punkte</th>
                             </tr>
                         </thead>
-                        <tbody id="print-table-body">
-                            <!-- JS befüllt dies -->
-                        </tbody>
+                        <tbody id="print-table-body"></tbody>
                     </table>
                 </div>
             </section>
 
             <section class="bg-slate-900 p-6 rounded-xl shadow-xl border border-slate-800">
-                <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-800 pb-2">Feedback & Bemerkungen</h2>
-                <textarea id="feedback-text" class="w-full bg-slate-800 border border-slate-700 text-white rounded-md p-3 outline-none h-32" placeholder="Was war besonders gut? Was kann verbessert werden?"></textarea>
+                <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-800 pb-2">Anmerkungen</h2>
+                <textarea id="feedback-text" class="w-full bg-slate-800 border border-slate-700 text-white rounded-md p-3 outline-none h-32" placeholder="Kommentare..."></textarea>
             </section>
-
         </div>
 
-        <!-- Sidebar Dashboard -->
         <div class="lg:col-span-4">
-            <div class="bg-slate-900 rounded-xl shadow-2xl border border-slate-800 sticky top-6 overflow-hidden">
-                <div class="p-8 border-b border-slate-800 bg-slate-900/50 text-center">
-                    <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Durchschnittsscore</h2>
-                    <div class="text-6xl font-black text-blue-500" id="total-score">0.0</div>
-                    <div class="text-slate-500 mt-2 text-sm font-medium">Skala 1.0 - 5.0</div>
-                </div>
-
-                <div class="p-6">
-                    <h3 class="font-semibold text-white mb-6 text-center">Visuelle Auswertung</h3>
-                    <div class="chart-container">
-                        <canvas id="radarChart"></canvas>
-                    </div>
+            <div class="bg-slate-900 rounded-xl shadow-2xl border border-slate-800 p-6 text-center">
+                <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Gesamtergebnis</h2>
+                <div class="text-6xl font-black text-blue-500" id="total-score">0.0</div>
+                <h3 class="font-semibold text-white my-6">Visualisierung</h3>
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
                 </div>
             </div>
         </div>
@@ -205,58 +172,23 @@
         { id: 'c_3', title: 'Korrektheit der Infos' },
         { id: 'c_4', title: 'Persönlicher Nutzen/Wirkung' }
     ];
-
     let scores = {};
     let radarChartInstance = null;
 
-    function addCriterion() {
-        const input = document.getElementById('new-criterion-input');
-        const val = input.value.trim();
-        if (val === "") return;
-        const newId = 'c_' + Date.now();
-        config.push({ id: newId, title: val });
-        scores[newId] = 0;
-        input.value = "";
-        renderCriteria();
-        updateChartStructure();
-        calculateTotal();
-    }
-
-    function removeCriterion(id) {
-        config = config.filter(c => c.id !== id);
-        delete scores[id];
-        renderCriteria();
-        updateChartStructure();
-        calculateTotal();
-    }
-
-    function updateCriterionTitle(id, newTitle) {
-        const item = config.find(c => c.id === id);
-        if (item) { 
-            item.title = newTitle; 
-            updateChartStructure();
-        }
-    }
-
     function renderCriteria() {
         const container = document.getElementById('criteria-container');
-        if (config.length === 0) {
-            container.innerHTML = '<p class="text-slate-500 text-center py-8 italic">Keine Kriterien definiert.</p>';
-            return;
-        }
-
         container.innerHTML = config.map(item => `
-            <div class="flex items-center justify-between gap-4 p-4 bg-slate-800/30 rounded-lg border border-slate-800/50 hover:bg-slate-800/50 transition-all">
+            <div class="flex items-center justify-between gap-4 p-4 bg-slate-800/30 rounded-lg border border-slate-800/50">
                 <div class="flex-grow flex items-center gap-2">
-                    <input type="text" value="${item.title}" onchange="updateCriterionTitle('${item.id}', this.value)" class="bg-transparent border-none text-slate-200 font-bold focus:ring-0 p-0 w-full outline-none">
-                    <button onclick="removeCriterion('${item.id}')" class="no-print text-slate-600 hover:text-red-500 transition-colors">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <input type="text" value="${item.title}" onchange="updateTitle('${item.id}', this.value)" class="bg-transparent border-none text-slate-200 font-bold w-full outline-none p-0">
+                    <button onclick="removeCriterion('${item.id}')" class="no-print text-slate-600 hover:text-red-500">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
                 <div class="flex gap-1">
                     ${[1,2,3,4,5].map(val => `
                         <input type="radio" name="${item.id}" id="${item.id}_${val}" value="${val}" class="rating-radio sr-only" ${scores[item.id] == val ? 'checked' : ''} onchange="updateScore('${item.id}', ${val})">
-                        <label for="${item.id}_${val}" class="w-8 h-8 flex items-center justify-center rounded border border-slate-700 cursor-pointer text-slate-400 font-bold text-xs hover:border-blue-500 transition-all">
+                        <label for="${item.id}_${val}" class="w-8 h-8 flex items-center justify-center rounded border border-slate-700 cursor-pointer text-slate-400 font-bold text-xs">
                             ${val}
                         </label>
                     `).join('')}
@@ -265,14 +197,22 @@
         `).join('');
     }
 
-    function updateScore(id, value) {
-        scores[id] = value;
-        calculateTotal();
+    function updateScore(id, value) { scores[id] = value; calculateTotal(); }
+    function updateTitle(id, val) { const item = config.find(c => c.id === id); if(item) { item.title = val; updateChartLabels(); } }
+    function addCriterion() {
+        const input = document.getElementById('new-criterion-input');
+        if(!input.value) return;
+        const newId = 'c_' + Date.now();
+        config.push({ id: newId, title: input.value });
+        input.value = "";
+        renderCriteria();
+        updateChartLabels();
     }
+    function removeCriterion(id) { config = config.filter(c => c.id !== id); delete scores[id]; renderCriteria(); updateChartLabels(); calculateTotal(); }
 
     function calculateTotal() {
-        const values = Object.values(scores).filter(v => v > 0);
-        const avg = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+        const vals = Object.values(scores).filter(v => v > 0);
+        const avg = vals.length ? vals.reduce((a,b) => a+b, 0) / vals.length : 0;
         document.getElementById('total-score').textContent = avg.toFixed(1);
         updateChartData();
     }
@@ -287,59 +227,27 @@
                     data: config.map(() => 0),
                     backgroundColor: 'rgba(59, 130, 246, 0.2)',
                     borderColor: '#3b82f6',
-                    borderWidth: 2,
-                    pointBackgroundColor: '#3b82f6'
+                    borderWidth: 2
                 }]
             },
             options: {
                 maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        grid: { color: '#334155' },
-                        angleLines: { color: '#334155' },
-                        suggestedMin: 0, 
-                        suggestedMax: 5,
-                        ticks: { display: false, stepSize: 1 },
-                        pointLabels: { color: '#94a3b8', font: { size: 10 } }
-                    }
-                },
+                scales: { r: { suggestedMin: 0, suggestedMax: 5, ticks: { display: false, stepSize: 1 } } },
                 plugins: { legend: { display: false } }
             }
         });
     }
 
-    function updateChartStructure() {
-        if(radarChartInstance) { 
-            radarChartInstance.data.labels = config.map(c => c.title); 
-            radarChartInstance.update(); 
-        }
-    }
+    function updateChartLabels() { if(radarChartInstance) { radarChartInstance.data.labels = config.map(c => c.title); radarChartInstance.update(); } }
+    function updateChartData() { if(radarChartInstance) { radarChartInstance.data.datasets[0].data = config.map(c => scores[c.id] || 0); radarChartInstance.update(); } }
 
-    function updateChartData() {
-        if(radarChartInstance) { 
-            radarChartInstance.data.datasets[0].data = config.map(c => scores[c.id] || 0); 
-            radarChartInstance.update(); 
-        }
-    }
-
-    // PDF Vorbereitung und Druck
     function prepareAndPrint() {
-        const tableBody = document.getElementById('print-table-body');
-        tableBody.innerHTML = config.map(item => `
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.title}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold;">${scores[item.id] || '-'}</td>
-            </tr>
-        `).join('');
-        
-        // Timeout für Rendering-Stabilität
-        setTimeout(() => { 
-            window.print(); 
-        }, 300);
+        const tbody = document.getElementById('print-table-body');
+        tbody.innerHTML = config.map(c => `<tr><td>${c.title}</td><td style="text-align:right">${scores[c.id] || '-'}</td></tr>`).join('');
+        setTimeout(() => window.print(), 200);
     }
 
     window.onload = () => { renderCriteria(); initChart(); };
 </script>
-
 </body>
 </html>
